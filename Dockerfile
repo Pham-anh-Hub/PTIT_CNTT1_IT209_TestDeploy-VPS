@@ -1,13 +1,16 @@
-#stage 1: build
-FROM gradle:9.4.1-jdk17-alpine AS build
+# --- GIAI ĐOẠN 1: Build file JAR ---
+FROM maven:3.8.4-openjdk-17 AS builder
 WORKDIR /app
-COPY . .
-RUN chmod +x gradlew
-RUN ./gradlew clean bootJar --no-daemon
+COPY pom.xml .
+COPY src ./src
+# Build ra file jar
+RUN mvn clean package -DskipTests
 
-#stage 2: run
+# --- GIAI ĐOẠN 2: Chạy ứng dụng ---
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
-COPY --from=build /app/build/libs/*.jar app.jar
-EXPOSE 8089
+# Sao chép file jar đã build từ giai đoạn 1 sang
+COPY --from=builder /app/target/*.jar app.jar
+
+EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
