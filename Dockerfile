@@ -1,16 +1,11 @@
-# --- GIAI ĐOẠN 1: Build file JAR ---
+# Giai đoạn 1: Build file JAR từ mã nguồn
 FROM maven:3.8.4-openjdk-17 AS builder
 WORKDIR /app
-COPY pom.xml .
-COPY src ./src
-# Build ra file jar
-RUN mvn clean package -DskipTests
+COPY . .
+RUN ./gradlew clean bootJar --no-daemon
 
-# --- GIAI ĐOẠN 2: Chạy ứng dụng ---
+# Giai đoạn 2: Chạy ứng dụng
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
-# Sao chép file jar đã build từ giai đoạn 1 sang
-COPY --from=builder /app/target/*.jar app.jar
-
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+COPY --from=builder /app/build/libs/*.jar app.jar
+ENTRYPOINT ["java", "-jar", "app.jar", "--server.port=8089"]

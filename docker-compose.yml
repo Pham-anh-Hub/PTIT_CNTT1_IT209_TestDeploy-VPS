@@ -8,32 +8,22 @@ services:
     ports:
       - "8089:8089"
     environment:
-      # Sửa host trong JDBC URL từ demo-deploy-vps_db thành mysql-db (trùng với tên service bên dưới)
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/demo-deploy-vps_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: 123456789
+      SERVER_PORT: 8089
     depends_on:
       - mysql-db
+
   mysql-db:
     image: mysql:8.4
-    container_name: demo-deploy-vps
+    container_name: demo-deploy-vps-db
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: 123456789
       MYSQL_DATABASE: demo-deploy-vps_db
-    #    ports:
-    #        - "3307:3306"
     volumes:
       - mysql-data:/var/lib/mysql
+
 volumes:
   mysql-data:
-
-# Các cầu hình cần chú ý thay đổi|
-# - host trong SPRING_DATASOURCE_URL:..../mysql-db:3306..... (mysql)
-# - Tên Database, User và Password: Cập nhật lại MYSQL_DATABASE, MYSQL_ROOT_PASSWORD, cùng với SPRING_DATASOURCE_USERNAME và SPRING_DATASOURCE_PASSWORD cho khớp với cơ sở dữ liệu
-# Đổi tên Container và Volume
-# - container_name: Đổi tên các container (backend-app, demo-deploy-vps_db,...) thành tên riêng của dự án bạn để không bị trùng tên với các container cũ đang chạy trên máy.
-# - volumes: Đổi tên volume lưu trữ dữ liệu (ví dụ: mysql-data) để tránh bị tranh chấp hoặc dùng chung dữ liệu rác từ template cũ.
-# 3.3. Cấu hình Cổng (Ports):Tránh xung đột cổng mạng.
-#   - Kiểm tra xem cổng bên ngoài (phía bên trái dấu hai chấm trong mục ports, ví dụ "8089:8089")
-
