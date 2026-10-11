@@ -13,17 +13,26 @@ services:
       SPRING_DATASOURCE_PASSWORD: 123456789
       SERVER_PORT: 8089
     depends_on:
-      - mysql-db
+      mysql-db:
+        condition: service_healthy
 
   mysql-db:
     image: mysql:8.4
     container_name: demo-deploy-vps-db
     restart: always
+    ports:
+      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: 123456789
       MYSQL_DATABASE: demo-deploy-vps_db
     volumes:
       - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p123456789"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
 volumes:
-  mysql-data:
+  mysql-data: 
