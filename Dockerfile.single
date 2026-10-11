@@ -1,0 +1,12 @@
+# Build và chạy ứng dụng trong cùng một image (single-stage)
+FROM eclipse-temurin:17-jdk
+WORKDIR /app
+
+# Copy toàn bộ mã nguồn vào container
+COPY . .
+
+# Cấp quyền và đóng gói file jar
+RUN chmod +x ./gradlew && ./gradlew clean bootJar -x test --no-daemon
+
+EXPOSE 8089
+ENTRYPOINT ["java", "-jar", "build/libs/demo-deploy-vps-0.0.1-SNAPSHOT.jar", "--server.port=8089"]

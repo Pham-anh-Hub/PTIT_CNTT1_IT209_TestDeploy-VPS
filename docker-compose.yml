@@ -13,26 +13,20 @@ services:
       SPRING_DATASOURCE_PASSWORD: 123456789
       SERVER_PORT: 8089
     depends_on:
-      mysql-db:
-        condition: service_healthy
+      - mysql-db
 
   mysql-db:
     image: mysql:8.4
     container_name: demo-deploy-vps-db
     restart: always
-    ports:
-      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: 123456789
       MYSQL_DATABASE: demo-deploy-vps_db
     volumes:
       - mysql-data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p123456789"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
 
 volumes:
-  mysql-data: 
+  mysql-data:
+
+    # Nguyên nhân cũ: Khi chạy lệnh docker compose up, container backend và mysql-db được bật đồng thời. MySQL 8.4 cần khoảng 10–15 giây để khởi tạo dữ liệu và mở port 3306. Trong khi đó Spring Boot khởi động nhanh hơn và cố kết nối ngay dẫn đến bị từ chối (Connection refused).
+    # Sau đó: Cơ chế kết nối của Spring Boot (HikariCP) tự động thử lại (retry), khi MySQL sẵn sàng thì kết nối thành công (HikariPool-1 - Start completed).
